@@ -14,11 +14,19 @@
         android:theme="@style/Theme.LoginAndRegistration"
         tools:targetApi="31">
         <activity
-            android:name=".SleepDetailActivity"
+            android:name=".SleepListActivity"
             android:exported="false" />
         <activity
+            android:name=".LeaderboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SleepDetailActivity"
+            android:exported="false">
+
+        </activity>
+        <activity
             android:name=".RegistrationActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -28,6 +36,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

@@ -51,6 +51,9 @@ class LoginActivity : AppCompatActivity() {
                         // user has been logged in
                         Log.d("LoginActivity",
                             "handleResponse: ${user?.getProperty("username")} has logged in.")
+
+                        val sleepListIntent = Intent(this@LoginActivity, SleepListActivity::class.java)
+                        startActivity(sleepListIntent)
                     }
 
                     override fun handleFault(fault: BackendlessFault) {

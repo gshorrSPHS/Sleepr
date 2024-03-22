@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/item_sleepList_sortByHoursSlept"
+        android:title="@string/sort_by_hours_slept"/>
+    <item android:id="@+id/item_sleepList_sortByQuality"
+        android:title="@string/sort_by_quality"/>
+    <item android:id="@+id/item_sleepList_showFriends"
+        android:title="@string/show_hide_friends"/>
+</menu>
