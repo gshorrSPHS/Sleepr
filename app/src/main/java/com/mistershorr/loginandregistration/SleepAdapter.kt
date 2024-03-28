@@ -13,6 +13,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset.UTC
 import java.time.ZoneOffset.ofHours
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 class SleepAdapter (var dataSet: List<Sleep>) : RecyclerView.Adapter<SleepAdapter.ViewHolder>() {
 
@@ -47,15 +48,19 @@ class SleepAdapter (var dataSet: List<Sleep>) : RecyclerView.Adapter<SleepAdapte
 
 
         val formatter = DateTimeFormatter.ofPattern("yyy-MM-dd")
-        holder.textViewDate.text = formatter.format(LocalDateTime.ofEpochSecond(sleep.sleepDate.time, 0, ofHours(PDT)))
-        val sleepMillis = sleep.wakeTime.time - sleep.bedTime.time
-        val hours = sleepMillis / 1000 / 60 / 60
-        val minutes = sleepMillis / 1000 / 60 % 60
+//        holder.textViewDate.text = formatter.format(LocalDateTime.ofEpochSecond(sleep.sleepDate.time, 0, ofHours(PDT)))
+        holder.textViewDate.text = formatter.format(sleep.sleepDate)
+//        val sleepMillis = sleep.wakeTime.time - sleep.bedTime.time
+        var minutes = ChronoUnit.MINUTES.between(sleep.bedTime, sleep.wakeTime);
+        val hours = minutes / 60
+        minutes = minutes % 60
+//        val hours = sleepMillis / 1000 / 60 / 60
+//        val minutes = sleepMillis / 1000 / 60 % 60
         holder.textViewDuration.text = String.format("2%d:2%d", hours.toInt(), minutes)
-        val bedTime = LocalDateTime.ofInstant(sleep.bedTime.toInstant(), ofHours(PDT))
-        val wakeTime = LocalDateTime.ofInstant(sleep.wakeTime.toInstant(), ofHours(PDT))
+//        val bedTime = LocalDateTime.ofInstant(sleep.bedTime.toInstant(), ofHours(PDT))
+//        val wakeTime = LocalDateTime.ofInstant(sleep.wakeTime.toInstant(), ofHours(PDT))
         val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        holder.textViewHours.text = "${timeFormatter.format(bedTime)} - ${timeFormatter.format(wakeTime)}"
+        holder.textViewHours.text = "${timeFormatter.format(sleep.bedTime)} - ${timeFormatter.format(sleep.wakeTime)}"
         holder.ratingBarQuality.rating = sleep.quality.toFloat()
 
         // requires desugaring
