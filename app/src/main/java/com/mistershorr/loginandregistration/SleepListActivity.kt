@@ -108,6 +108,7 @@ class SleepListActivity : AppCompatActivity() {
                             type: Type?,
                             jsonDeserializationContext: JsonDeserializationContext?
                         ): LocalDateTime? {
+                            Log.d(TAG, "deserialize: ${json.asString}")
                             return LocalDateTime.parse(json.asString,
                             DateTimeFormatter.ofPattern("MMM dd, yyyy HH::mm::ss a").withLocale(Locale.US));
                         }
