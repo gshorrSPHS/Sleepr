@@ -10,6 +10,8 @@ data class Sleep(
     var bedTime: Date = Date(),
     var sleepDate: Date = Date(),
     var quality: Int = 5,
-    var notes: String? = null
+    var notes: String? = null,
+    var ownerId: String? = null,
+    var objectId: String? = null
 ) : Parcelable
 

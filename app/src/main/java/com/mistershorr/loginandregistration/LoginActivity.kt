@@ -52,6 +52,7 @@ class LoginActivity : AppCompatActivity() {
                         Log.d("LoginActivity",
                             "handleResponse: ${user?.getProperty("username")} has logged in.")
 
+                        // pass the userId as a string to the ListActivity
                         val sleepListIntent = Intent(this@LoginActivity, SleepListActivity::class.java)
                         startActivity(sleepListIntent)
                     }

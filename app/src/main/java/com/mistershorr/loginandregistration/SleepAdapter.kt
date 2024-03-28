@@ -1,6 +1,7 @@
 package com.mistershorr.loginandregistration
 
 import android.content.Intent
+import android.icu.util.Calendar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,9 +11,14 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import java.time.LocalDateTime
 import java.time.ZoneOffset.UTC
+import java.time.ZoneOffset.ofHours
 import java.time.format.DateTimeFormatter
 
 class SleepAdapter (var dataSet: List<Sleep>) : RecyclerView.Adapter<SleepAdapter.ViewHolder>() {
+
+    companion object {
+        val PDT = 7
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textViewDate : TextView
@@ -39,14 +45,15 @@ class SleepAdapter (var dataSet: List<Sleep>) : RecyclerView.Adapter<SleepAdapte
         val sleep = dataSet[position]
         val context = holder.layout.context
 
+
         val formatter = DateTimeFormatter.ofPattern("yyy-MM-dd")
-        holder.textViewDate.text = formatter.format(LocalDateTime.ofEpochSecond(sleep.sleepDate.time, 0, UTC))
+        holder.textViewDate.text = formatter.format(LocalDateTime.ofEpochSecond(sleep.sleepDate.time, 0, ofHours(PDT)))
         val sleepMillis = sleep.wakeTime.time - sleep.bedTime.time
         val hours = sleepMillis / 1000 / 60 / 60
         val minutes = sleepMillis / 1000 / 60 % 60
         holder.textViewDuration.text = String.format("2%d:2%d", hours.toInt(), minutes)
-        val bedTime = LocalDateTime.ofInstant(sleep.bedTime.toInstant(), UTC)
-        val wakeTime = LocalDateTime.ofInstant(sleep.wakeTime.toInstant(), UTC)
+        val bedTime = LocalDateTime.ofInstant(sleep.bedTime.toInstant(), ofHours(PDT))
+        val wakeTime = LocalDateTime.ofInstant(sleep.wakeTime.toInstant(), ofHours(PDT))
         val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
         holder.textViewHours.text = "${timeFormatter.format(bedTime)} - ${timeFormatter.format(wakeTime)}"
         holder.ratingBarQuality.rating = sleep.quality.toFloat()

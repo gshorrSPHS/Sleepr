@@ -1,17 +1,19 @@
 package com.mistershorr.loginandregistration
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.backendless.Backendless
 import com.backendless.async.callback.AsyncCallback
 import com.backendless.exceptions.BackendlessFault
-import com.mistershorr.loginandregistration.databinding.ActivitySleepDetailBinding
+import com.backendless.persistence.DataQueryBuilder
 import com.mistershorr.loginandregistration.databinding.ActivitySleepListBinding
+import java.util.Date
+
 
 class SleepListActivity : AppCompatActivity() {
 
@@ -30,8 +32,57 @@ class SleepListActivity : AppCompatActivity() {
 
     }
 
+    fun loadDataFromBackendless2() {
+        val userId = Backendless.UserService.CurrentUser().userId
+        // need the ownerId to match the objectId of the user
+        val whereClause = "ownerId = '$userId'"
+        val queryBuilder = DataQueryBuilder.create()
+        queryBuilder.whereClause = whereClause
+        // include the queryBuilder in the find function
+        Backendless.Data.of(Sleep::class.java).find(queryBuilder, object : AsyncCallback<List<Sleep?>?> {
+            override fun handleResponse(sleepList: List<Sleep?>?) {
+                Log.d(TAG, "handleResponse: $sleepList")
+                // this is where you would set up your recyclerView
+            }
+
+            override fun handleFault(fault: BackendlessFault) {
+                Log.d(TAG, "handleFault: ${fault.message}")
+            }
+        })
+    }
+
+    fun saveToBackendless() {
+        // the real use case will be to read from all the editText
+        // fields in the detail activity and then use that info
+        // to make the object
+
+        // here, we'll just make up an object
+        val sleep = Sleep(
+            Date(), Date(1711753845000L), Date(),
+            10, "finally a restful night"
+        )
+        sleep.ownerId = Backendless.UserService.CurrentUser().userId
+        // if i do not set the objectId, it will make a new object
+        // if I do set the objectId to an existing object Id from data table
+        // on backendless, it will update the object.
+
+        // include the async callback to save the object here
+    }
+
+
+
+
+
+
+
     private fun loadDataFromBackendless() {
-        Backendless.Data.of(Sleep::class.java).find(object: AsyncCallback<List<Sleep>> {
+        val userId = Backendless.UserService.CurrentUser().userId
+        // need the ownerId to match the objectId of the user
+        val whereClause = "ownerId = '$userId'"
+        val queryBuilder = DataQueryBuilder.create()
+        queryBuilder.whereClause = whereClause
+        // include the queryBuilder in the find function
+        Backendless.Data.of(Sleep::class.java).find(queryBuilder, object: AsyncCallback<List<Sleep>> {
             override fun handleResponse(response: List<Sleep>?) {
                 Log.d(TAG, "handleResponse: $response")
                 adapter = SleepAdapter(response ?: listOf())
