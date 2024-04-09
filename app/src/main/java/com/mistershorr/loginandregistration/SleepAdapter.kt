@@ -2,6 +2,7 @@ package com.mistershorr.loginandregistration
 
 import android.content.Intent
 import android.icu.util.Calendar
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +10,9 @@ import android.widget.RatingBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset.UTC
 import java.time.ZoneOffset.ofHours
 import java.time.format.DateTimeFormatter
@@ -19,6 +22,7 @@ class SleepAdapter (var dataSet: List<Sleep>) : RecyclerView.Adapter<SleepAdapte
 
     companion object {
         val PDT = 7
+        val TAG = "SleepAdapter"
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -48,30 +52,26 @@ class SleepAdapter (var dataSet: List<Sleep>) : RecyclerView.Adapter<SleepAdapte
 
 
         val formatter = DateTimeFormatter.ofPattern("yyy-MM-dd")
-//        holder.textViewDate.text = formatter.format(LocalDateTime.ofEpochSecond(sleep.sleepDate.time, 0, ofHours(PDT)))
-        holder.textViewDate.text = formatter.format(sleep.sleepDate)
-//        val sleepMillis = sleep.wakeTime.time - sleep.bedTime.time
-        var minutes = ChronoUnit.MINUTES.between(sleep.bedTime, sleep.wakeTime);
-        val hours = minutes / 60
-        minutes = minutes % 60
-//        val hours = sleepMillis / 1000 / 60 / 60
-//        val minutes = sleepMillis / 1000 / 60 % 60
-        holder.textViewDuration.text = String.format("2%d:2%d", hours.toInt(), minutes)
-//        val bedTime = LocalDateTime.ofInstant(sleep.bedTime.toInstant(), ofHours(PDT))
-//        val wakeTime = LocalDateTime.ofInstant(sleep.wakeTime.toInstant(), ofHours(PDT))
+        val sleepDate = LocalDateTime.ofEpochSecond(sleep.sleepDateMillis/1000, 0,
+            ZoneId.systemDefault().rules.getOffset(Instant.now()))
+//        Log.d(TAG, "onBindViewHolder: ${sleepDate.year}/${sleepDate.month}/${sleepDate.dayOfMonth} ${sleepDate.hour}:${sleepDate.minute}")
+        holder.textViewDate.text = formatter.format(sleepDate)
+        val deltaMillis = sleep.wakeMillis - sleep.bedMillis
+
+
+        val hours = deltaMillis / (1000 * 60 * 60)
+        val minutes = deltaMillis / (1000 * 60) % 60
+
+        holder.textViewDuration.text = String.format("%02d:%02d", hours, minutes)
+        val bedTime = LocalDateTime.ofEpochSecond(sleep.bedMillis/1000, 0,
+            ZoneId.systemDefault().rules.getOffset(Instant.now()))
+        val wakeTime = LocalDateTime.ofEpochSecond(sleep.wakeMillis/1000, 0,
+            ZoneId.systemDefault().rules.getOffset(Instant.now()))
         val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-        holder.textViewHours.text = "${timeFormatter.format(sleep.bedTime)} - ${timeFormatter.format(sleep.wakeTime)}"
+        holder.textViewHours.text = "${timeFormatter.format(bedTime)} - ${timeFormatter.format(wakeTime)}"
         holder.ratingBarQuality.rating = sleep.quality.toFloat()
 
-        // requires desugaring
-        // https://developer.android.com/studio/write/java8-support#library-desugaring
-//        val formatter = DateTimeFormatter.ofPattern("MMM dd, YYYY, hh:mm:ss a")
-//        val time = earthquake.properties.time
-//        val utcTime = LocalDateTime.ofInstant(
-//            Instant.ofEpochMilli(time),
-//            TimeZone.getTimeZone("UTC").toZoneId())
-//        holder.timeTextView.text = formatter.format(utcTime)
-//        val magnitude = earthquake.properties.mag
+
 
         holder.layout.setOnClickListener {
             val hero = dataSet[position]

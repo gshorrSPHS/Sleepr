@@ -8,9 +8,12 @@ import java.util.Date
 
 @Parcelize
 data class Sleep(
-    var wakeTime: LocalDateTime = LocalDateTime.now(),
-    var bedTime: LocalDateTime = LocalDateTime.now(),
-    var sleepDate: LocalDateTime = LocalDateTime.now(),
+    var wakeTime: Date = Date(),
+    var bedTime: Date = Date(),
+    var sleepDate: Date = Date(),
+    var wakeMillis: Long = Date().time,
+    var bedMillis: Long = Date().time,
+    var sleepDateMillis: Long = Date().time,
     var quality: Int = 5,
     var notes: String? = null,
     var ownerId: String? = null,

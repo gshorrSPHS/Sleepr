@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.backendless.Backendless
 import com.backendless.async.callback.AsyncCallback
 import com.backendless.exceptions.BackendlessFault
@@ -24,6 +25,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.Locale
 
 
@@ -70,7 +72,8 @@ class SleepListActivity : AppCompatActivity() {
 
         // here, we'll just make up an object
         val sleep = Sleep(
-            LocalDateTime.now(), LocalDateTime.now(), LocalDateTime.now(),
+            Date(), Date(), Date(),
+            Date().time, Date().time, Date().time,
             10, "finally a restful night"
         )
         sleep.ownerId = Backendless.UserService.CurrentUser().userId
@@ -95,32 +98,32 @@ class SleepListActivity : AppCompatActivity() {
         queryBuilder.whereClause = whereClause
         // include the queryBuilder in the find function
 
-        Backendless.Data.of("Sleep").find(queryBuilder, object: AsyncCallback<List<Map<*,*>>> {
-            override fun handleResponse(response: List<Map<*,*>>?) {
-                Log.d(TAG, "handleResponse: ${response?.get(0)}")
+        Backendless.Data.of(Sleep::class.java).find(queryBuilder, object: AsyncCallback<List<Sleep>> {
+            override fun handleResponse(response: List<Sleep>?) {
+                Log.d(TAG, "handleResponse: $response")
                 // from https://stackoverflow.com/questions/22310143/java-8-localdatetime-deserialized-using-gson
-                val gson: Gson = GsonBuilder().registerTypeAdapter(
-                    LocalDateTime::class.java,
-                    object : JsonDeserializer<LocalDateTime?> {
-                        @Throws(JsonParseException::class)
-                        override fun deserialize(
-                            json: JsonElement,
-                            type: Type?,
-                            jsonDeserializationContext: JsonDeserializationContext?
-                        ): LocalDateTime? {
-                            Log.d(TAG, "deserialize: ${json.asString}")
-                            return LocalDateTime.parse(json.asString,
-                            DateTimeFormatter.ofPattern("MMM dd, yyyy HH::mm::ss a").withLocale(Locale.US));
-                        }
-                    }).create()
-                val sleep = gson.fromJson<Sleep>(gson.toJson(response?.get(0)), object : TypeToken<Sleep>() {}.type)
-                Log.d(TAG, "handleResponse: converted from json: $sleep")
+//                val gson: Gson = GsonBuilder().registerTypeAdapter(
+//                    LocalDateTime::class.java,
+//                    object : JsonDeserializer<LocalDateTime?> {
+//                        @Throws(JsonParseException::class)
+//                        override fun deserialize(
+//                            json: JsonElement,
+//                            type: Type?,
+//                            jsonDeserializationContext: JsonDeserializationContext?
+//                        ): LocalDateTime? {
+//                            Log.d(TAG, "deserialize: ${json.asString}")
+//                            return LocalDateTime.parse(json.asString,
+//                            DateTimeFormatter.ofPattern("MMM dd, yyyy HH::mm::ss a").withLocale(Locale.US));
+//                        }
+//                    }).create()
+//                val sleep = gson.fromJson<Sleep>(gson.toJson(response?.get(0)), object : TypeToken<Sleep>() {}.type)
+//                Log.d(TAG, "handleResponse: converted from json: $sleep")
 
 
 
-//                adapter = SleepAdapter(sleepList ?: listOf())
-//                binding.recyclerViewSleepList.adapter = adapter
-//                binding.recyclerViewSleepList.layoutManager = LinearLayoutManager(this@SleepListActivity)
+                adapter = SleepAdapter(response ?: listOf())
+                binding.recyclerViewSleepList.adapter = adapter
+                binding.recyclerViewSleepList.layoutManager = LinearLayoutManager(this@SleepListActivity)
             }
 
             override fun handleFault(fault: BackendlessFault?) {
