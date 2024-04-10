@@ -21,7 +21,6 @@ import java.time.temporal.ChronoUnit
 class SleepAdapter (var dataSet: List<Sleep>) : RecyclerView.Adapter<SleepAdapter.ViewHolder>() {
 
     companion object {
-        val PDT = 7
         val TAG = "SleepAdapter"
     }
 
@@ -54,15 +53,18 @@ class SleepAdapter (var dataSet: List<Sleep>) : RecyclerView.Adapter<SleepAdapte
         val formatter = DateTimeFormatter.ofPattern("yyy-MM-dd")
         val sleepDate = LocalDateTime.ofEpochSecond(sleep.sleepDateMillis/1000, 0,
             ZoneId.systemDefault().rules.getOffset(Instant.now()))
-//        Log.d(TAG, "onBindViewHolder: ${sleepDate.year}/${sleepDate.month}/${sleepDate.dayOfMonth} ${sleepDate.hour}:${sleepDate.minute}")
         holder.textViewDate.text = formatter.format(sleepDate)
+
+        // calculate the difference in time from bed to wake and convert to hours & minutes
+        // use String.format() to display it in HH:mm format in the duration textview
+        // hint: you need leading zeroes and a width of 2
         val deltaMillis = sleep.wakeMillis - sleep.bedMillis
-
-
         val hours = deltaMillis / (1000 * 60 * 60)
         val minutes = deltaMillis / (1000 * 60) % 60
 
         holder.textViewDuration.text = String.format("%02d:%02d", hours, minutes)
+
+
         val bedTime = LocalDateTime.ofEpochSecond(sleep.bedMillis/1000, 0,
             ZoneId.systemDefault().rules.getOffset(Instant.now()))
         val wakeTime = LocalDateTime.ofEpochSecond(sleep.wakeMillis/1000, 0,
@@ -72,11 +74,9 @@ class SleepAdapter (var dataSet: List<Sleep>) : RecyclerView.Adapter<SleepAdapte
         holder.ratingBarQuality.rating = sleep.quality.toFloat()
 
 
-
         holder.layout.setOnClickListener {
-            val hero = dataSet[position]
             val intent = Intent(context, SleepDetailActivity::class.java).apply {
-                putExtra(SleepDetailActivity.EXTRA_SLEEP, dataSet[position])
+                putExtra(SleepDetailActivity.EXTRA_SLEEP, sleep)
             }
             context.startActivity(intent)
         }

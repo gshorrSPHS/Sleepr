@@ -13,6 +13,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.time.ZoneOffset.UTC
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -30,6 +31,9 @@ class SleepDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySleepDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // these are default values that should be set when creating a new entry
+        // however, if editing an existing entry, those values should be used instead
 
         bedTime = LocalDateTime.now()
         val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
@@ -58,16 +62,34 @@ class SleepDetailActivity : AppCompatActivity() {
 
             Log.d(TAG, "onCreate: after build: ${LocalDateTime.ofEpochSecond(datePicker.selection?: 0L, 0, ZoneOffset.UTC)}")
             datePicker.addOnPositiveButtonClickListener { millis ->
-                val selectedLocalDate = Instant.ofEpochMilli(millis).atOffset(ZoneOffset.UTC).toLocalDateTime()
+                var selectedLocalDate = Instant.ofEpochMilli(millis).atOffset(ZoneOffset.UTC).toLocalDateTime()
                 Toast.makeText(this, "Date is: ${dateFormatter.format(selectedLocalDate)}", Toast.LENGTH_SHORT).show()
-                bedTime = LocalDateTime.of(selectedLocalDate.year, selectedLocalDate.month, selectedLocalDate.dayOfMonth, bedTime.hour, bedTime.minute)
-                wakeTime = LocalDateTime.of(selectedLocalDate.year, selectedLocalDate.month, selectedLocalDate.dayOfMonth, wakeTime.hour, wakeTime.minute)
+
+                // make sure that waking up the next day if waketime < bedtime is preserved
+                var wakeDate = selectedLocalDate
+
+                if(wakeTime.dayOfMonth != bedTime.dayOfMonth) {
+                    wakeDate = wakeDate.plusDays(1)
+                }
+
+                bedTime = LocalDateTime.of(
+                    selectedLocalDate.year,
+                    selectedLocalDate.month,
+                    selectedLocalDate.dayOfMonth,
+                    bedTime.hour,
+                    bedTime.minute
+                )
+
+                wakeTime = LocalDateTime.of(
+                    wakeDate.year,
+                    wakeDate.month,
+                    wakeDate.dayOfMonth,
+                    wakeTime.hour,
+                    wakeTime.minute
+                )
                 binding.buttonSleepDetailDate.text = dateFormatter.format(bedTime)
-                Log.d(TAG, "onCreate: $bedTime")
             }
-
-
-            datePicker.show(supportFragmentManager, "datepicker")
+           datePicker.show(supportFragmentManager, "datepicker")
         }
 
     }
@@ -81,16 +103,21 @@ class SleepDetailActivity : AppCompatActivity() {
 
         timePickerDialog.show(supportFragmentManager, "bedtime")
         timePickerDialog.addOnPositiveButtonClickListener {
-            val selectedTime = LocalDateTime.of(time.year, time.month, time.dayOfMonth, timePickerDialog.hour, timePickerDialog.minute)
-            val newDateTime = time.with(selectedTime)
-            Toast.makeText(this, "Time is: ${timeFormatter.format(newDateTime)}", Toast.LENGTH_SHORT).show()
+            var selectedTime = LocalDateTime.of(time.year, time.month, time.dayOfMonth, timePickerDialog.hour, timePickerDialog.minute)
             button.text = timeFormatter.format(selectedTime)
             when(button.id) {
                 binding.buttonSleepDetailBedTime.id -> {
                     bedTime = selectedTime
-                    Log.d(TAG, "setTime: $bedTime")
+                    if(wakeTime.toEpochSecond(UTC) < selectedTime.toEpochSecond(UTC)) {
+                        wakeTime = wakeTime.plusDays(1)
+                    }
                 }
-                binding.buttonSleepDetailWakeTime.id -> wakeTime = selectedTime
+                binding.buttonSleepDetailWakeTime.id -> {
+                    if(selectedTime.toEpochSecond(UTC) < bedTime.toEpochSecond(UTC)) {
+                        selectedTime = selectedTime.plusDays(1)
+                    }
+                    wakeTime = selectedTime
+                }
             }
         }
     }

@@ -46,25 +46,6 @@ class SleepListActivity : AppCompatActivity() {
 
     }
 
-    fun loadDataFromBackendless2() {
-        val userId = Backendless.UserService.CurrentUser().userId
-        // need the ownerId to match the objectId of the user
-        val whereClause = "ownerId = '$userId'"
-        val queryBuilder = DataQueryBuilder.create()
-        queryBuilder.whereClause = whereClause
-        // include the queryBuilder in the find function
-        Backendless.Data.of(Sleep::class.java).find(queryBuilder, object : AsyncCallback<List<Sleep?>?> {
-            override fun handleResponse(sleepList: List<Sleep?>?) {
-                Log.d(TAG, "handleResponse: $sleepList")
-                // this is where you would set up your recyclerView
-            }
-
-            override fun handleFault(fault: BackendlessFault) {
-                Log.d(TAG, "handleFault: ${fault.message}")
-            }
-        })
-    }
-
     fun saveToBackendless() {
         // the real use case will be to read from all the editText
         // fields in the detail activity and then use that info
@@ -72,7 +53,6 @@ class SleepListActivity : AppCompatActivity() {
 
         // here, we'll just make up an object
         val sleep = Sleep(
-            Date(), Date(), Date(),
             Date().time, Date().time, Date().time,
             10, "finally a restful night"
         )
@@ -83,12 +63,6 @@ class SleepListActivity : AppCompatActivity() {
 
         // include the async callback to save the object here
     }
-
-
-
-
-
-
 
     private fun loadDataFromBackendless() {
         val userId = Backendless.UserService.CurrentUser().userId
@@ -101,25 +75,6 @@ class SleepListActivity : AppCompatActivity() {
         Backendless.Data.of(Sleep::class.java).find(queryBuilder, object: AsyncCallback<List<Sleep>> {
             override fun handleResponse(response: List<Sleep>?) {
                 Log.d(TAG, "handleResponse: $response")
-                // from https://stackoverflow.com/questions/22310143/java-8-localdatetime-deserialized-using-gson
-//                val gson: Gson = GsonBuilder().registerTypeAdapter(
-//                    LocalDateTime::class.java,
-//                    object : JsonDeserializer<LocalDateTime?> {
-//                        @Throws(JsonParseException::class)
-//                        override fun deserialize(
-//                            json: JsonElement,
-//                            type: Type?,
-//                            jsonDeserializationContext: JsonDeserializationContext?
-//                        ): LocalDateTime? {
-//                            Log.d(TAG, "deserialize: ${json.asString}")
-//                            return LocalDateTime.parse(json.asString,
-//                            DateTimeFormatter.ofPattern("MMM dd, yyyy HH::mm::ss a").withLocale(Locale.US));
-//                        }
-//                    }).create()
-//                val sleep = gson.fromJson<Sleep>(gson.toJson(response?.get(0)), object : TypeToken<Sleep>() {}.type)
-//                Log.d(TAG, "handleResponse: converted from json: $sleep")
-
-
 
                 adapter = SleepAdapter(response ?: listOf())
                 binding.recyclerViewSleepList.adapter = adapter
